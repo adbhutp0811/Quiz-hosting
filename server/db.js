@@ -73,6 +73,12 @@ db.exec(`
   ON attempts (quiz_id, user_id);
 `);
 
+// Migrate: add rollno column if it doesn't exist
+const hasRollno = db.prepare("PRAGMA table_info(users)").all().some(c => c.name === 'rollno');
+if (!hasRollno) {
+  db.exec("ALTER TABLE users ADD COLUMN rollno TEXT DEFAULT ''");
+}
+
 const adminExists = db.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1").get();
 const demoUserExists = db.prepare("SELECT id FROM users WHERE email='john@example.com' LIMIT 1").get();
 
