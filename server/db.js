@@ -83,7 +83,7 @@ const adminExists = db.prepare("SELECT id FROM users WHERE role='admin' LIMIT 1"
 const demoUserExists = db.prepare("SELECT id FROM users WHERE email='john@example.com' LIMIT 1").get();
 
 if (!adminExists || !demoUserExists) {
-  const adminPw = bcrypt.hashSync('admin123', 10);
+  const adminPw = bcrypt.hashSync('Admin@123', 10);
   const userPw  = bcrypt.hashSync('user123', 10);
   const insertUser = db.prepare(
     "INSERT OR IGNORE INTO users (username, email, password, role, rollno) VALUES (?, ?, ?, ?, ?)"
