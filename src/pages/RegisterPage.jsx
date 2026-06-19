@@ -6,7 +6,7 @@ import { UserPlus, Eye, EyeOff, Zap } from 'lucide-react';
 export default function RegisterPage() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username:'', email:'', password:'', confirm:'', role:'user' });
+  const [form, setForm] = useState({ username:'', email:'', password:'', confirm:'', role:'user', rollno:'' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -29,7 +29,7 @@ export default function RegisterPage() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
     try {
-      await register(form.username, form.email, form.password, form.role);
+      await register(form.username, form.email, form.password, form.role, form.rollno);
       navigate('/');
     } catch (err) {
       setErrors({ general: err.response?.data?.error || 'Registration failed' });
@@ -99,6 +99,11 @@ export default function RegisterPage() {
                 onChange={e => set('confirm', e.target.value)}
                 className={`form-input ${errors.confirm ? 'error' : ''}`} placeholder="Repeat password" />
               {errors.confirm && <span className="form-error">{errors.confirm}</span>}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Roll Number</label>
+              <input value={form.rollno} onChange={e => set('rollno', e.target.value)}
+                className="form-input" placeholder="e.g. 2024CS001" />
             </div>
             <div className="form-group">
               <label className="form-label">Role</label>

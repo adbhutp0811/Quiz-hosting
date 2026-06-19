@@ -10,7 +10,7 @@ export default function AdminUsers() {
   const [search, setSearch]   = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating]     = useState(false);
-  const [newUser, setNewUser] = useState({ username:'', email:'', password:'', role:'user' });
+  const [newUser, setNewUser] = useState({ username:'', email:'', password:'', role:'user', rollno:'' });
   const [createErr, setCreateErr]   = useState('');
   const [actionId, setActionId]     = useState(null);
 
@@ -43,7 +43,7 @@ export default function AdminUsers() {
     try {
       await api.post('/admin/users', newUser);
       setShowCreate(false);
-      setNewUser({ username:'', email:'', password:'', role:'user' });
+      setNewUser({ username:'', email:'', password:'', role:'user', rollno:'' });
       load();
     } catch (err) {
       setCreateErr(err.response?.data?.error || 'Failed to create user');
@@ -97,6 +97,11 @@ export default function AdminUsers() {
                     className="form-input" placeholder="Min 6 characters" required />
                 </div>
                 <div className="form-group">
+                  <label className="form-label">Roll Number</label>
+                  <input value={newUser.rollno} onChange={e => setNewUser(p => ({...p, rollno: e.target.value}))}
+                    className="form-input" placeholder="e.g. 2024CS001" />
+                </div>
+                <div className="form-group">
                   <label className="form-label">Role</label>
                   <select value={newUser.role} onChange={e => setNewUser(p => ({...p, role: e.target.value}))} className="form-input">
                     <option value="user">User</option>
@@ -133,6 +138,7 @@ export default function AdminUsers() {
               <tr>
                 <th>User</th>
                 <th>Email</th>
+                <th>Roll No</th>
                 <th>Role</th>
                 <th>Attempts</th>
                 <th>Avg Score</th>
@@ -155,6 +161,7 @@ export default function AdminUsers() {
                     </div>
                   </td>
                   <td style={{ color:'var(--gray-600)', fontSize:'.875rem' }}>{u.email}</td>
+                  <td style={{ color:'var(--gray-600)', fontSize:'.875rem' }}>{u.rollno || '—'}</td>
                   <td>
                     <span className={`badge ${u.role === 'admin' ? 'badge-primary' : 'badge-gray'}`}>
                       {u.role === 'admin' ? <><Shield size={11} />Admin</> : 'User'}

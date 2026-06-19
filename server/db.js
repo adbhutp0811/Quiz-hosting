@@ -16,6 +16,7 @@ db.exec(`
     email       TEXT    NOT NULL UNIQUE,
     password    TEXT    NOT NULL,
     role        TEXT    NOT NULL DEFAULT 'user',
+    rollno      TEXT    DEFAULT '',
     created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -79,14 +80,14 @@ if (!adminExists || !demoUserExists) {
   const adminPw = bcrypt.hashSync('admin123', 10);
   const userPw  = bcrypt.hashSync('user123', 10);
   const insertUser = db.prepare(
-    "INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)"
+    "INSERT OR IGNORE INTO users (username, email, password, role, rollno) VALUES (?, ?, ?, ?, ?)"
   );
 
-  const adminId = insertUser.run('admin', 'admin@quizly.com', adminPw, 'admin').lastInsertRowid ||
+  const adminId = insertUser.run('admin', 'admin@quizly.com', adminPw, 'admin', '').lastInsertRowid ||
     db.prepare("SELECT id FROM users WHERE email='admin@quizly.com'").get().id;
 
-  insertUser.run('john_doe', 'john@example.com', userPw, 'user');
-  insertUser.run('jane_doe', 'jane@example.com', userPw, 'user');
+  insertUser.run('john_doe', 'john@example.com', userPw, 'user', '');
+  insertUser.run('jane_doe', 'jane@example.com', userPw, 'user', '');
 
   const insertQuiz = db.prepare(
     "INSERT INTO quizzes (title, description, category, difficulty, time_limit, created_by, is_published) VALUES (?,?,?,?,?,?,?)"

@@ -7,7 +7,7 @@ import { authenticate, JWT_SECRET } from '../middleware/auth.js';
 const router = Router();
 
 router.post('/register', (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, rollno } = req.body;
   if (!username || !email || !password)
     return res.status(400).json({ error: 'All fields are required' });
   if (password.length < 6)
@@ -19,10 +19,10 @@ router.post('/register', (req, res) => {
 
   const hash = bcrypt.hashSync(password, 10);
   const result = db.prepare(
-    "INSERT INTO users (username, email, password, role) VALUES (?,?,?,?)"
-  ).run(username, email, hash, normalizedRole);
+    "INSERT INTO users (username, email, password, role, rollno) VALUES (?,?,?,?,?)"
+  ).run(username, email, hash, normalizedRole, rollno || '');
 
-  const user = { id: result.lastInsertRowid, username, email, role: normalizedRole };
+  const user = { id: result.lastInsertRowid, username, email, role: normalizedRole, rollno: rollno || '' };
   const token = jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
   res.json({ token, user });
 });
@@ -36,13 +36,13 @@ router.post('/login', (req, res) => {
   if (!row || !bcrypt.compareSync(password, row.password))
     return res.status(401).json({ error: 'Invalid email or password' });
 
-  const user = { id: row.id, username: row.username, email: row.email, role: row.role };
+  const user = { id: row.id, username: row.username, email: row.email, role: row.role, rollno: row.rollno };
   const token = jwt.sign(user, JWT_SECRET, { expiresIn: '7d' });
   res.json({ token, user });
 });
 
 router.get('/me', authenticate, (req, res) => {
-  const row = db.prepare('SELECT id, username, email, role, created_at FROM users WHERE id=?').get(req.user.id);
+  const row = db.prepare('SELECT id, username, email, role, rollno, created_at FROM users WHERE id=?').get(req.user.id);
   if (!row) return res.status(404).json({ error: 'User not found' });
   res.json(row);
 });

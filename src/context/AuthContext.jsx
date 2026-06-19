@@ -37,8 +37,8 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   };
 
-  const register = async (username, email, password, role = 'user') => {
-    const res = await api.post('/auth/register', { username, email, password, role });
+  const register = async (username, email, password, role = 'user', rollno = '') => {
+    const res = await api.post('/auth/register', { username, email, password, role, rollno });
     const newUser = res.data.user;
     localStorage.setItem('qz_token', res.data.token);
     setUser(newUser);

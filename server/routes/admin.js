@@ -45,7 +45,7 @@ router.get('/quizzes', (req, res) => {
 // All users
 router.get('/users', (req, res) => {
   const users = db.prepare(`
-    SELECT u.id, u.username, u.email, u.role, u.created_at,
+    SELECT u.id, u.username, u.email, u.role, u.rollno, u.created_at,
       (SELECT COUNT(*) FROM quizzes WHERE created_by=u.id) as quizzes_created,
       (SELECT COUNT(*) FROM attempts WHERE user_id=u.id) as quizzes_taken
     FROM users u ORDER BY u.created_at DESC
@@ -55,15 +55,15 @@ router.get('/users', (req, res) => {
 
 // Create user
 router.post('/users', (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password, role, rollno } = req.body;
   if (!username || !email || !password)
     return res.status(400).json({ error: 'All fields required' });
   const existing = db.prepare('SELECT id FROM users WHERE email=? OR username=?').get(email, username);
   if (existing) return res.status(409).json({ error: 'Email or username already taken' });
   const hash = bcrypt.hashSync(password, 10);
   const result = db.prepare(
-    'INSERT INTO users (username, email, password, role) VALUES (?,?,?,?)'
-  ).run(username, email, hash, role === 'admin' ? 'admin' : 'user');
+    'INSERT INTO users (username, email, password, role, rollno) VALUES (?,?,?,?,?)'
+  ).run(username, email, hash, role === 'admin' ? 'admin' : 'user', rollno || '');
   res.json({ id: result.lastInsertRowid, message: 'User created' });
 });
 
