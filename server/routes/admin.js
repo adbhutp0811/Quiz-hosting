@@ -88,13 +88,39 @@ router.delete('/users/:id', (req, res) => {
 router.get('/attempts', (req, res) => {
   const attempts = db.prepare(`
     SELECT a.id, a.score, a.total, a.percentage, a.time_taken, a.completed_at,
-           u.username, u.email, q.title as quiz_title, q.category
+           u.username, u.email, u.rollno, q.title as quiz_title, q.category
     FROM attempts a
     JOIN users u ON a.user_id=u.id
     JOIN quizzes q ON a.quiz_id=q.id
     ORDER BY a.completed_at DESC
   `).all();
   res.json(attempts);
+});
+
+// Export attempts as CSV
+router.get('/attempts/export', (req, res) => {
+  const attempts = db.prepare(`
+    SELECT u.username, u.email, u.rollno, q.title as quiz_title,
+           a.score, a.total, a.percentage, a.time_taken, a.completed_at
+    FROM attempts a
+    JOIN users u ON a.user_id=u.id
+    JOIN quizzes q ON a.quiz_id=q.id
+    ORDER BY a.completed_at DESC
+  `).all();
+
+  const header = 'Username,Email,Roll No,Quiz,Score,Total,Percentage,Result,Time Taken,Date';
+  const rows = attempts.map(a => {
+    const result = a.percentage >= 60 ? 'Pass' : 'Fail';
+    const time = a.time_taken > 0 ? `${Math.floor(a.time_taken/60)}m ${a.time_taken%60}s` : '—';
+    const date = new Date(a.completed_at).toLocaleString();
+    const escape = v => `"${String(v).replace(/"/g, '""')}"`;
+    return [escape(a.username), escape(a.email), escape(a.rollno||''), escape(a.quiz_title),
+            a.score, a.total, a.percentage, result, escape(time), escape(date)].join(',');
+  });
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="quiz_results.csv"');
+  res.send([header, ...rows].join('\n'));
 });
 
 export default router;

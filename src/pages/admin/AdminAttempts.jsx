@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
-import { BarChart2, Search, TrendingUp, Users, Trophy, BookOpen } from 'lucide-react';
+import { BarChart2, Search, TrendingUp, Users, Trophy, Download } from 'lucide-react';
 
 export default function AdminAttempts() {
   const [attempts, setAttempts] = useState([]);
@@ -30,6 +30,20 @@ export default function AdminAttempts() {
   const avgScore = attempts.length ? Math.round(attempts.reduce((s,a) => s+a.percentage,0) / attempts.length) : 0;
   const passRate = attempts.length ? Math.round((attempts.filter(a => a.percentage >= 60).length / attempts.length) * 100) : 0;
 
+  const exportCSV = async () => {
+    const token = localStorage.getItem('qz_token');
+    const res = await fetch('/api/admin/attempts/export', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quiz_results.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="aa-wrap fade-in">
       <div className="aa-header">
@@ -37,6 +51,9 @@ export default function AdminAttempts() {
           <h1 className="aa-title">Attempts</h1>
           <p className="aa-sub">{attempts.length} total quiz attempts</p>
         </div>
+        <button className="btn btn-outline" onClick={exportCSV}>
+          <Download size={16} /> Export CSV
+        </button>
       </div>
 
       {/* Stats */}
