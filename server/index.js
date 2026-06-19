@@ -25,6 +25,6 @@ app.get('/api/health', (_, res) => res.json({ status: 'ok', time: new Date().toI
 
 const distPath = path.join(__dirname, '..', 'dist');
 app.use(express.static(distPath));
-app.get('*', (_, res) => res.sendFile(path.join(distPath, 'index.html')));
+app.get('/{*path}', (_, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 API server running on http://localhost:${PORT}`));
